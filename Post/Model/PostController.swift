@@ -8,25 +8,34 @@
 
 import Foundation
 
+protocol PostControllerDelegate {
+    func postsWereUpdated(posts: [Post], on postController: PostController)
+}
+
 class PostController {
     
+    static let shared = PostController()
     
     // base URL
-    private static let baseURL = URL(string: "https://devmtn-post.firebaseio.com/posts")
-    
-    // getter endpoint
-    private static let getterEndpoint = baseURL?.appendingPathExtension("json")
+    private let baseURL = URL(string: "https://devmtn-post.firebaseio.com/posts")
     
     // posts
-    static var posts = [Post]() {
+    var posts = [Post]() {
         didSet {
-            print(posts.count)
+            delegate?.postsWereUpdated(posts: posts, on: self)
         }
     }
     
-    static func fetchPosts(completion: @escaping ([Post]) -> Void) {
+    // delegate
+    var delegate: PostControllerDelegate?
+    
+    init() {
+        fetchPosts()
+    }
+    
+    func fetchPosts() {
         // url
-        guard let url = getterEndpoint else { completion([]); return }
+        guard let url = baseURL?.appendingPathExtension("json") else { return }
         print(url.absoluteString)
         
         // request
@@ -39,14 +48,12 @@ class PostController {
             
             if let error = error {
                 print("Error: \(error.localizedDescription)")
-                completion([])
                 return
             }
             
-            guard let data = data else { completion([]); return }
+            guard let data = data else { return }
             
             guard let dictionaryObject = (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)) as? [String: [String: Any]] else {
-                completion([])
                 return
             }
             
@@ -55,8 +62,6 @@ class PostController {
             let sortedPosts = posts.sorted(by: { $0.timeStamp > $1.timeStamp })
             
             self.posts = sortedPosts
-            
-            completion(sortedPosts)
         }
         dataTask.resume()
     }

@@ -13,9 +13,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        PostController.fetchPosts { (posts) in
-            
-        }
+        PostController.shared.fetchPosts()
     }
 
     override func didReceiveMemoryWarning() {
