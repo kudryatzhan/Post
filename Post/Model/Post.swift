@@ -29,14 +29,14 @@ class Post {
     }
     
     init?(dictionary: [String: Any], identifier: String) {
-        guard let post = dictionary[identifier] as? [String: Any],
-            let text = post[textKey] as? String,
-            let timestamp = post[timeStampKey] as? TimeInterval,
-            let username = post[usernameKey] as? String else { return nil }
+        guard let text = dictionary[textKey] as? String,
+            let timestamp = dictionary[timeStampKey] as? Double,
+            let username = dictionary[usernameKey] as? String,
+            let identifier = UUID(uuidString: identifier) else { return nil }
         
         self.text = text
         self.timeStamp = timestamp
         self.username = username
-        self.identifier = UUID(uuidString: identifier)!
+        self.identifier = identifier
     }
 }
